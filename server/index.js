@@ -30,7 +30,7 @@ io.on('connection', (socket) => {
         })
     });
     socket.on('answerCall', ({ to, signal }) => {
-        io.to(to).emit('callAccept', signal)
+        io.to(to).emit('callAccepted', signal)
     })
 })
 
