@@ -3,10 +3,10 @@ import { io } from 'socket.io-client';
 import Peer from 'simple-peer';
 
 const SocketContext = createContext();
-const socket = io('http://localhost:5000');
+const socket = io('http://localhost:8080');
 
-const ContextProvider = ({children}) => {
-    const [stream, setStream] = useState(null)
+const ContextProvider = ({ children }) => {
+    const [stream, setStream] = useState()
     const [me, setMe] = useState('')
     const [name, setName] = useState('')
     const [call, setCall] = useState({})
@@ -19,11 +19,15 @@ const ContextProvider = ({children}) => {
 
     useEffect(() => {
         navigator.mediaDevices.getUserMedia({ video: true, audio: true })
-        .then((currentStream) => {
-            setStream(currentStream);
-            currentUserVideoRef.current.srcObject = currentStream;
-        })
-        socket.on('me', (id) => setMe(id));
+            .then((currentStream) => {
+                setStream(currentStream);
+
+                currentUserVideoRef.current.srcObject = currentStream;
+            });
+
+        socket.on('me', (id) => {
+            setMe(id)
+        });
         socket.on('callUser', ({ from, name: callerName, signal }) => {
             setCall({ isReceivingCall: true, from, name: callerName, signal });
         });
@@ -31,17 +35,21 @@ const ContextProvider = ({children}) => {
 
     const answerCall = () => {
         setCallAccepted(true);
-        
+
         const peer = new Peer({ initiator: false, trickle: false, stream });
+
         peer.on('signal', (data) => {
-            socket.emit('answerCall', { signal: data, to: call.from })
-        })
+            socket.emit('answerCall', { signal: data, to: call.from });
+        });
+
         peer.on('stream', (currentStream) => {
             otherUserVideoRef.current.srcObject = currentStream;
-        })
-        peer.signal(call.signal)
+        });
+
+        peer.signal(call.signal);
+
         connectionRef.current = peer;
-    }
+    };
 
     const callUser = (id) => {
         const peer = new Peer({ initiator: true, trickle: false, stream });
@@ -66,17 +74,17 @@ const ContextProvider = ({children}) => {
 
     return (
         <SocketContext.Provider value={{
-            call, 
-            callAccepted, 
-            stream, 
-            currentUserVideoRef, 
+            call,
+            callAccepted,
+            stream,
+            currentUserVideoRef,
             otherUserVideoRef,
-            name, 
-            setName, 
-            callEnded, 
-            me, 
-            callUser, 
-            leaveCall, 
+            name,
+            setName,
+            callEnded,
+            me,
+            callUser,
+            leaveCall,
             answerCall
         }}>
             {children}
