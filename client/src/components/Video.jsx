@@ -20,11 +20,11 @@ export const Video = ({ isMuted = false, curRef, name }) => {
   const classes = useStyles();
 
   return (
-      <Paper className={classes.paper}>
-        <Grid item xs={12} md={6}>
-          <Typography variant="h5" gutterBottom>{name}</Typography>
-          <video playsInline muted={isMuted} autoPlay className={classes.video} ref={null}/>
-        </Grid>
-      </Paper>
+    <Paper className={classes.paper}>
+      <Grid item xs={12} md={6}>
+        <Typography variant="h5" gutterBottom>{name}</Typography>
+        <video playsInline muted={isMuted} autoPlay className={classes.video} ref={curRef} />
+      </Grid>
+    </Paper>
   )
 }
